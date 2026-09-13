@@ -139,7 +139,7 @@ footer button{background:none;color:inherit;text-decoration:underline;padding:0}
           <circle class="bubble" cx="32" cy="82" r="4" fill="#fff"/><circle class="bubble" cx="44" cy="86" r="3" fill="#fff"/><circle class="bubble" cx="52" cy="80" r="2.5" fill="#fff"/>
         </svg>
       </div>
-      <div><h1>نادي العلوم</h1><p id="sub">جرّب، واكتشف، واجمع النقاط!</p></div>
+      <div><h1>نادي العلوم</h1><p id="schoolName" style="margin:6px 0 0;font-size:22px;font-weight:700;color:var(--sun)"></p><p id="sub">جرّب، واكتشف، واجمع النقاط!</p></div>
     </div>
     <div class="who">
       <div class="row"><label for="nameIn">الاسم:</label><input id="nameIn" placeholder="اكتب الاسم" autocomplete="off" aria-label="اسم الطالب"></div>
@@ -177,10 +177,19 @@ const SCHOOLS = {
   'amna':      { name:'مدرسة آمنة محمود الجيدة الابتدائية للبنات', pin:'2468' },
   // 'alkhor':  { name:'مدرسة الخور الابتدائية', pin:'1357' },   // مثال لإضافة مدرسة جديدة
 };
-const SID = new URLSearchParams(location.search).get('school') || '';
+const DEFAULT_SCHOOL = 'amna';  // المدرسة الافتراضية عند فتح الرابط بدون إضافة
+const _q = new URLSearchParams(location.search);
+const SID = _q.has('admin') ? '' : (_q.get('school') || DEFAULT_SCHOOL);
 const SCHOOL = SCHOOLS[SID] || null;    // المدرسة الحالية حسب الرابط (أو لا شيء = وضع المشرفة)
-const FIREBASE_CONFIG = null;      // الصقي هنا إعدادات Firebase بدل null لتصبح اللوحة مشتركة
-// مثال: const FIREBASE_CONFIG = { apiKey:"...", authDomain:"...", databaseURL:"...", projectId:"..." };
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAtf2o2Bs0bwCSOQYFA0FFNfS8oNO1uL9g",
+  authDomain: "science-club-f590a.firebaseapp.com",
+  databaseURL: "https://science-club-f590a-default-rtdb.firebaseio.com",
+  projectId: "science-club-f590a",
+  storageBucket: "science-club-f590a.firebasestorage.app",
+  messagingSenderId: "881704151129",
+  appId: "1:881704151129:web:c429b71f01ac9891d62948"
+};
 
 /* ======================================================
    الوحدات والتجارب
@@ -570,7 +579,7 @@ function renderTeacher(){
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('حذف '+students[b.dataset.del].name+'؟')){ removeStudent(b.dataset.del); renderTeacher(); } });
 }
 function removeStudent(k){ delete students[k]; if(db) db.ref('students/'+k).remove(); else local.set('club.students',students); if(k===name){name='';local.set('club.name','');} renderScore(); renderCards(); }
-if(SCHOOL) $('#sub').textContent=SCHOOL.name+' · جرّب، واكتشف، واجمع النقاط!';
+if(SCHOOL) $('#schoolName').textContent=SCHOOL.name;
 renderScore(); renderCards();
 </script>
 </body>
