@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نادي العلوم</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--sky:#EAF6FF;--ink:#1B2A49;--sun:#FFD23F;--coral:#FF6B57;--leaf:#3DCC7A;--water:#4FB3FF;--white:#fff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Baloo Bhaijaan 2',system-ui,sans-serif;background:var(--sky);color:var(--ink);font-size:18px;line-height:1.6}
+button{font:inherit;cursor:pointer;border:0}
+button:focus-visible,input:focus-visible{outline:4px solid var(--sun);outline-offset:2px}
+.wrap{max-width:900px;margin:0 auto;padding:0 18px}
+
+header{background:var(--ink);color:var(--white);padding:36px 0 30px}
+.hero{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.hero h1{font-size:58px;line-height:1;margin:0;font-weight:800}
+.hero p{margin:6px 0 0;font-size:20px;opacity:.85}
+.beaker{width:96px;height:120px;flex:none}
+.beaker svg{width:100%;height:100%}
+.bubble{animation:rise 2.6s ease-in infinite}
+.bubble:nth-child(2){animation-delay:.9s}.bubble:nth-child(3){animation-delay:1.7s}
+@keyframes rise{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(-52px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.bubble{animation:none}}
+.who{margin-top:22px;display:block;max-width:460px}
+.who .row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.who label{font-weight:700;font-size:20px;width:64px;flex:none}
+.who input{font:inherit;font-size:18px;padding:10px 14px;border-radius:14px;border:0;flex:1;min-width:0}
+.who .row2{display:flex;gap:10px;align-items:center}
+.who button{background:var(--sun);color:var(--ink);padding:10px 18px;border-radius:14px;font-weight:700}
+.score{background:rgba(255,255,255,.12);padding:8px 16px;border-radius:14px;font-weight:700}
+.score b{color:var(--sun);font-size:24px}
+
+nav{display:flex;gap:8px;margin:20px 0;flex-wrap:wrap}
+nav button{background:var(--white);padding:10px 18px;border-radius:999px;font-weight:700;color:var(--ink);border:3px solid transparent}
+nav button[aria-selected=true]{border-color:var(--ink)}
+
+.unit{margin-bottom:26px}
+.unit h2{font-size:26px;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+.unit h2 small{font-size:15px;font-weight:500;opacity:.6;margin-inline-start:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:var(--white);border-radius:22px;padding:18px;text-align:right;color:var(--ink);display:flex;flex-direction:column;gap:6px;position:relative;box-shadow:0 6px 0 rgba(27,42,73,.12)}
+.card:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(27,42,73,.12)}
+.card .em{font-size:44px;line-height:1}
+.card h3{margin:0;font-size:22px}
+.card p{margin:0;font-size:16px;opacity:.75}
+.card .done{position:absolute;top:12px;left:12px;background:var(--leaf);color:#fff;border-radius:999px;padding:2px 10px;font-size:14px;font-weight:700}
+.card.locked{opacity:.5;filter:grayscale(.6)}
+.card .lock{position:absolute;top:10px;left:12px;font-size:24px}
+.lvl{font-size:14px;opacity:.7;font-weight:700}
+.meter{height:22px;background:#fff;border:3px solid var(--ink);border-radius:999px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--sun);transition:width .5s}
+.bars{display:flex;gap:18px;align-items:flex-end;height:180px;justify-content:center;padding:10px}
+.bar{width:70px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bar i{display:block;width:100%;border-radius:10px 10px 0 0;transition:height .8s}
+.bar b{font-size:30px}
+.race{display:grid;gap:8px}
+.lane{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:6px 10px}
+.lane .tr{flex:1;height:10px;background:#EAF6FF;border-radius:6px;position:relative}
+.lane .tr span{position:absolute;right:0;top:-12px;font-size:26px;transition:right 2s linear}
+.tag{display:inline-block;font-size:14px;padding:2px 10px;border-radius:999px;width:fit-content}
+.tag.sim{background:#DDF0FF}.tag.real{background:#FFE8CF}
+
+.panel{display:none;background:var(--white);border-radius:26px;padding:22px}
+.panel.open{display:block}
+.panel h2{margin:0 0 4px;font-size:32px}
+.back{background:var(--sun);color:var(--ink);font-weight:800;font-size:20px;padding:10px 22px;border-radius:14px;margin-bottom:14px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 0 rgba(27,42,73,.2)}
+.back:active{transform:translateY(3px);box-shadow:none}
+.back{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 4px 0 rgba(27,42,73,.2)}50%{transform:scale(1.07);box-shadow:0 4px 0 rgba(27,42,73,.2),0 0 0 10px rgba(255,210,63,.35)}}
+@media (prefers-reduced-motion:reduce){.back{animation:none}}
+.lab{background:var(--sky);border-radius:20px;padding:18px;margin:14px 0}
+.controls{display:grid;gap:12px}
+.controls label{display:flex;align-items:center;gap:12px;font-weight:700}
+.controls input[type=range]{flex:1;accent-color:var(--coral)}
+.choices{display:flex;gap:8px;flex-wrap:wrap}
+.choices button,.opt{background:var(--white);border:3px solid var(--ink);border-radius:14px;padding:8px 14px;font-weight:700;color:var(--ink)}
+.choices button[aria-pressed=true]{background:var(--sun)}
+.choices button.used{opacity:.35;pointer-events:none}
+.result{font-size:22px;font-weight:800;min-height:34px;margin-top:10px}
+.big{background:var(--coral);color:#fff;padding:12px 26px;border-radius:16px;font-weight:800;font-size:20px;margin-top:10px}
+.big:disabled{opacity:.4;cursor:default}
+ol.steps{padding-inline-start:0;list-style:none;margin:0;display:grid;gap:10px}
+ol.steps li{display:flex;gap:12px;align-items:flex-start;background:var(--sky);padding:12px 14px;border-radius:16px}
+ol.steps input{width:26px;height:26px;accent-color:var(--leaf);flex:none;margin-top:6px}
+.q{margin:14px 0;padding:14px;border-radius:16px;background:#FFF8DC}
+.q p{margin:0 0 8px;font-weight:800}
+.q .opt{margin:4px}
+.q .opt.ok{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+.q .opt.bad{background:#ffd6d0;border-color:var(--coral)}
+.materials{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.materials span{background:#FFE8CF;padding:4px 12px;border-radius:999px;font-weight:700;font-size:16px}
+.warn{background:#FFF1F0;border-inline-start:6px solid var(--coral);padding:10px 14px;border-radius:12px;font-weight:700;margin:10px 0}
+
+.chain{display:flex;gap:8px;flex-wrap:wrap;min-height:70px;background:var(--white);border:4px dashed var(--ink);border-radius:18px;padding:10px;align-items:center;margin:12px 0}
+.chain span{font-size:38px}.chain .arrow{font-size:26px;opacity:.5}
+.tank{height:200px;border-radius:18px;background:linear-gradient(#EAF6FF 0 38%,var(--water) 38%);position:relative;overflow:hidden;border:4px solid var(--ink)}
+.obj{position:absolute;left:50%;transform:translateX(-50%);font-size:52px;transition:top .8s cubic-bezier(.3,1.4,.5,1)}
+.box{height:180px;border:4px solid var(--ink);border-radius:18px;position:relative;overflow:hidden;background:#fff}
+.p{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--water);transition:all .8s}
+.wave{width:100%;height:120px;background:#fff;border-radius:18px;border:4px solid var(--ink)}
+.mag{display:flex;align-items:center;justify-content:center;gap:10px;height:110px;font-size:60px;position:relative}
+.mag .m{transition:transform .8s cubic-bezier(.3,1.4,.5,1);display:flex}
+.pole{width:50px;height:60px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff}
+.pole.n{background:#FF6B57;border-radius:12px 0 0 12px}.pole.s{background:#4FB3FF;border-radius:0 12px 12px 0}
+.item{font-size:34px;font-weight:800;text-align:center;background:#fff;border-radius:18px;padding:18px;margin-bottom:12px;min-height:80px}
+
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.badge{background:var(--white);border-radius:20px;padding:14px;text-align:center;opacity:.35;filter:grayscale(1)}
+.badge.won{opacity:1;filter:none;border:3px solid var(--sun)}
+.badge .em{font-size:44px}
+.badge b{display:block;font-size:16px}
+.board{background:var(--white);border-radius:22px;overflow:hidden}
+.board>div{display:grid;grid-template-columns:2fr 1fr 1.6fr 1fr;gap:8px;align-items:center;padding:12px 16px;border-bottom:2px solid var(--sky);font-weight:700}
+.board>div>span:last-child{text-align:left}
+.board small{display:block;font-size:12px;opacity:.6;font-weight:500}
+.board .hdr{background:var(--sun);font-size:19px}
+.board.s>div{grid-template-columns:2fr 1fr 1fr}
+.board>div.t{grid-template-columns:2fr 1fr 1.6fr .8fr .8fr .6fr;font-size:15px}
+@media (max-width:520px){.board>div{grid-template-columns:1.6fr 0.8fr 1.2fr 0.9fr;font-size:15px;padding:10px 8px}}
+.board .me{background:#E4F9EC}
+.board .top3{font-size:22px}
+.empty{padding:20px;text-align:center;opacity:.7}
+.live{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--leaf);margin-inline-end:6px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--ink);color:#fff;padding:14px 24px;border-radius:18px;font-weight:800;font-size:20px;transition:transform .35s;z-index:9;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+footer{text-align:center;padding:30px 0;opacity:.6;font-size:15px}
+footer button{background:none;color:inherit;text-decoration:underline;padding:0}
+@media (max-width:520px){.hero h1{font-size:44px}.beaker{width:70px;height:90px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hero">
+      <div class="beaker" aria-hidden="true">
+        <svg viewBox="0 0 80 100">
+          <path d="M28 8h24M32 8v30L12 84c-3 6 1 12 8 12h40c7 0 11-6 8-12L48 38V8" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M22 62h36l10 22c2 5-1 8-5 8H17c-4 0-7-3-5-8z" fill="#3DCC7A"/>
+          <circle class="bubble" cx="32" cy="82" r="4" fill="#fff"/><circle class="bubble" cx="44" cy="86" r="3" fill="#fff"/><circle class="bubble" cx="52" cy="80" r="2.5" fill="#fff"/>
+        </svg>
+      </div>
+      <div><h1>نادي العلوم</h1><p id="schoolName" style="margin:6px 0 0;font-size:22px;font-weight:700;color:var(--sun)"></p><p id="sub">جرّب، واكتشف، واجمع النقاط!</p></div>
+    </div>
+    <div class="who">
+      <div class="row"><label for="nameIn">الاسم:</label><input id="nameIn" placeholder="اكتب الاسم" autocomplete="off" aria-label="اسم الطالب"></div>
+      <div class="row"><label for="clsIn">الصف:</label><input id="clsIn" placeholder="اكتب الصف" autocomplete="off" aria-label="الصف"></div>
+      <input id="schIn" type="hidden">
+      <div class="row2"><button id="nameBtn">ابدأ</button><div class="score">نقاطي <b id="pts">0</b> ⭐</div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav role="tablist">
+    <button role="tab" aria-selected="true" data-tab="exp">🧪 التجارب</button>
+    <button role="tab" aria-selected="false" data-tab="badges">🏅 شاراتي</button>
+    <button role="tab" aria-selected="false" data-tab="board">🏆 المتصدرون</button>
+  </nav>
+  <section id="tab-exp"><div id="units"></div><div class="panel" id="panel"></div></section>
+  <section id="tab-badges" hidden><div class="badges" id="badges"></div></section>
+  <section id="tab-teacher" hidden></section>
+  <section id="tab-board" hidden>
+    <div class="board" id="board"></div>
+    <p id="boardNote" style="opacity:.6;font-size:15px;text-align:center"></p>
+  </section>
+</main>
+<footer>نادي العلوم · مدرسة آمنة محمود الجيدة الابتدائية للبنات<br>مصمم الموقع: محضرة المختبر بينه الكواري<br><button id="teacher">لوحة المعلم</button></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================================================
+   إعدادات المعلمة
+   ====================================================== */
+const ADMIN_PIN = '1234';          // رقمك السري كمشرفة (يعرض كل المدارس)
+// أضيفي مدرسة لكل محضّر مختبر: المعرّف بالإنجليزي بدون مسافات، الاسم الظاهر، ورقمه السري
+const SCHOOLS = {
+  'amna':      { name:'مدرسة آمنة محمود الجيدة الابتدائية للبنات', pin:'2468' },
+  // 'alkhor':  { name:'مدرسة الخور الابتدائية', pin:'1357' },   // مثال لإضافة مدرسة جديدة
+};
+const DEFAULT_SCHOOL = 'amna';  // المدرسة الافتراضية عند فتح الرابط بدون إضافة
+const _q = new URLSearchParams(location.search);
+const SID = _q.has('admin') ? '' : (_q.get('school') || DEFAULT_SCHOOL);
+const SCHOOL = SCHOOLS[SID] || null;    // المدرسة الحالية حسب الرابط (أو لا شيء = وضع المشرفة)
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAtf2o2Bs0bwCSOQYFA0FFNfS8oNO1uL9g",
+  authDomain: "science-club-f590a.firebaseapp.com",
+  databaseURL: "https://science-club-f590a-default-rtdb.firebaseio.com",
+  projectId: "science-club-f590a",
+  storageBucket: "science-club-f590a.firebasestorage.app",
+  messagingSenderId: "881704151129",
+  appId: "1:881704151129:web:c429b71f01ac9891d62948"
+};
+
+/* ======================================================
+   الوحدات والتجارب
+   ====================================================== */
+const UNITS = [
+ {id:'elec', em:'💡', name:'الدوائر الكهربية', exps:[
+   {id:'circuit', em:'🔋', title:'أضئ المصباح', desc:'ركّب الدائرة وأغلق المفتاح', lvl:1},
+   {id:'conduct', em:'🔌', title:'موصل أم عازل؟', desc:'أي المواد يمر فيها التيار؟', lvl:2},
+   {id:'lab', em:'⚡', title:'مختبر الدائرة', desc:'بطاريات ومصابيح أكثر… ماذا يحدث لشدة التيار؟', lvl:3}]},
+ {id:'food', em:'🦅', name:'السلاسل الغذائية', exps:[
+   {id:'chain', em:'🌿', title:'رتّب السلسلة', desc:'من يأكل من؟', lvl:1},
+   {id:'eaters', em:'🍽️', title:'ماذا يأكل؟', desc:'منتِج، آكل أعشاب، أم آكل لحوم؟', lvl:2},
+   {id:'web', em:'⚖️', title:'توازن الغابة', desc:'ماذا لو اختفى الثعلب؟ راقب الأعداد', lvl:3}]},
+ {id:'matter', em:'🧊', name:'حالات المادة', exps:[
+   {id:'states', em:'🌡️', title:'سخّن وبرّد', desc:'جليد… ماء… بخار!', lvl:1},
+   {id:'sort', em:'📦', title:'صلب، سائل، أم غاز؟', desc:'صنّف الأشياء من حولك', lvl:2},
+   {id:'changes', em:'🔁', title:'تغيّرات الحالة', desc:'ذوبان، تجمّد، تبخّر، تكاثف', lvl:3}]},
+ {id:'life', em:'🦋', name:'دورات حياة الكائنات الحية', exps:[
+   {id:'butterfly', em:'🐛', title:'من بيضة إلى فراشة', desc:'رتّب مراحل دورة الحياة', lvl:1},
+   {id:'frog', em:'🐸', title:'من بيضة إلى ضفدع', desc:'رتّب مراحل حياة الضفدع', lvl:2},
+   {id:'meta', em:'🔬', title:'أنواع التحوّل', desc:'تحوّل كامل، غير كامل، أم بلا تحوّل؟', lvl:3}]},
+ {id:'magnet', em:'🧲', name:'المغناطيس', exps:[
+   {id:'attract', em:'📎', title:'هل يجذبه المغناطيس؟', desc:'خمّن ثم جرّب', lvl:1},
+   {id:'poles', em:'🔄', title:'أقطاب المغناطيس', desc:'يتجاذبان أم يتنافران؟', lvl:2},
+   {id:'force', em:'📏', title:'قوة المغناطيس', desc:'المسافة والحواجز… كم مشبكاً يرفع؟', lvl:3}]},
+ {id:'ear', em:'👂', name:'تركيب الأذن', exps:[
+   {id:'earpath', em:'🎧', title:'رحلة الصوت في الأذن', desc:'رتّب أجزاء الأذن التي يمر بها الصوت', lvl:1},
+   {id:'earjob', em:'🧩', title:'وظيفة كل جزء', desc:'أي جزء يقوم بهذا العمل؟', lvl:2},
+   {id:'earzones', em:'🗺️', title:'أقسام الأذن', desc:'خارجية، وسطى، أم داخلية؟', lvl:3}]},
+ {id:'sound', em:'🔊', name:'الصوت', exps:[
+   {id:'pitch', em:'🎵', title:'حاد أم غليظ؟', desc:'غيّر الصوت واسمعه', lvl:1},
+   {id:'sounds', em:'🎶', title:'أصوات من حولنا', desc:'صنّف الأصوات: حادة أم غليظة', lvl:2},
+   {id:'medium', em:'🚀', title:'سباق الصوت', desc:'في أي وسط ينتقل الصوت أسرع؟', lvl:3}]},
+];
+const EXPS = UNITS.flatMap(u=>u.exps.map(e=>({...e,unit:u.id})));
+const BADGES = [
+ {id:'first', em:'🚀', name:'أول تجربة', test:s=>s.done.length>=1},
+ ...UNITS.map(u=>({id:'u_'+u.id, em:u.em, name:u.name, test:s=>u.exps.every(e=>s.done.includes(e.id))})),
+ {id:'hundred', em:'⭐', name:'100 نقطة', test:s=>s.pts>=100},
+ {id:'all', em:'🏆', name:'مكتشف عظيم', test:s=>s.done.length>=EXPS.length},
+];
+
+/* ======================================================
+   التخزين: Firebase (مشترك) أو الجهاز (محلي)
+   ====================================================== */
+const local = {get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let students = local.get('club.students',{});
+Object.keys(students).forEach(k=>{const x=students[k]; students[k]={name:x.name||k,cls:x.cls||'',school:x.school||'',sid:x.sid||'',pts:x.pts||0,done:x.done||[],badges:x.badges||[]}});
+let name = local.get('club.name','') || ''; if(typeof name!=='string') name='';
+let db = null;
+const blank=(n='',c='',sc='')=>({name:n,cls:c,school:sc,sid:SID,pts:0,done:[],badges:[]});
+const key=n=>n.replace(/[.#$\[\]\/]/g,'');
+const me=()=> students[name] || (students[name]=blank());
+function save(){
+  local.set('club.name',name);
+  if(!name) return;
+  if(db) db.ref('students/'+key(name)).set({...me(), t:Date.now()});
+  else local.set('club.students',students);
+  renderScore();
+}
+if(FIREBASE_CONFIG){
+  const s1=document.createElement('script'); s1.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js';
+  const s2=document.createElement('script'); s2.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js';
+  s1.onload=()=>document.head.appendChild(s2);
+  s2.onload=()=>{ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database();
+    db.ref('students').on('value',snap=>{ const v=snap.val()||{}; students={}; Object.entries(v).forEach(([k,s])=>students[k]={name:s.name||k,cls:s.cls||'',school:s.school||'',sid:s.sid||'',pts:s.pts||0,done:s.done||[],badges:s.badges||[]}); renderScore(); renderCards(); if(!$('#tab-board').hidden) renderBoard(); }); };
+  document.head.appendChild(s1);
+}
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e.t);e.t=setTimeout(()=>e.classList.remove('show'),2200)}
+function renderScore(){ const s=students[name]; $('#pts').textContent = s? s.pts : 0; $('#nameIn').value=''; $('#clsIn').value=''; }
+function award(id,points,label){
+  if(!name){ toast('اكتب اسمك أولاً في الأعلى 👆'); $('#nameIn').focus(); return false; }
+  const s=me();
+  if(s.done.includes(id)) { toast('أكملت هذه التجربة من قبل 👍'); return true; }
+  s.pts+=points; s.done.push(id);
+  toast(`+${points} نقاط! ${label||''}`);
+  BADGES.forEach(b=>{ if(!s.badges.includes(b.id)&&b.test(s)){ s.badges.push(b.id); setTimeout(()=>toast(`🏅 شارة جديدة: ${b.name}`),1400);} });
+  save(); renderCards(); return true;
+}
+$('#nameBtn').onclick=()=>{
+  const v=$('#nameIn').value.trim(), c=$('#clsIn').value.trim(), sc=SCHOOL?SCHOOL.name:$('#schIn').value.trim();
+  if(!v) return toast('اكتب اسمك 😊'); if(!c) return toast('اكتب الصف 🏫');
+  name=key(`${SID?SID+' | ':''}${v} | ${c} | ${sc}`); if(!students[name]) students[name]=blank(v,c,sc); save(); renderCards(); toast(`أهلاً ${v}! 🔬`);
+};
+['#nameIn','#clsIn'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')$('#nameBtn').click()}));
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  $('#tab-teacher').hidden=true; ['exp','badges','board'].forEach(t=>$('#tab-'+t).hidden = t!==b.dataset.tab);
+  if(b.dataset.tab==='badges') renderBadges(); if(b.dataset.tab==='board') renderBoard();
+});
+
+/* ---------- cards ---------- */
+function isLocked(id){
+  const i=EXPS.findIndex(e=>e.id===id); if(i===0) return false;
+  const done = name&&students[name]? students[name].done : [];
+  return !done.includes(EXPS[i-1].id);
+}
+function renderCards(){
+  const done = name&&students[name]? students[name].done : [];
+  $('#units').innerHTML = UNITS.map(u=>`<div class="unit"><h2>${u.em} ${u.name}<small>${u.exps.filter(e=>done.includes(e.id)).length}/${u.exps.length}</small></h2><div class="grid">`+
+    u.exps.map(e=>{const L=isLocked(e.id);return `<button class="card ${L?'locked':''}" data-id="${e.id}">${done.includes(e.id)?'<span class="done">✓ أُنجزت</span>':L?'<span class="lock">🔒</span>':''}<span class="em">${e.em}</span><h3>${e.title}</h3><p>${e.desc}</p><span class="lvl">${"⭐".repeat(e.lvl)} ${["سهل","متوسط","متقدم"][e.lvl-1]}</span></button>`}).join('')+`</div></div>`).join('');
+  document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{
+    if(isLocked(c.dataset.id)){ toast(name?'🔒 أكمل التجربة السابقة أولاً':'اكتب اسمك وصفك ومدرستك أولاً 👆'); return; }
+    open(c.dataset.id);
+  });
+}
+function open(id){
+  const p=$('#panel'); p.innerHTML=BUILD[id](); p.classList.add('open'); $('#units').hidden=true;
+  p.querySelector('.back').onclick=()=>{p.classList.remove('open');$('#units').hidden=false;window.scrollTo({top:0,behavior:'smooth'})};
+  INIT[id]&&INIT[id](p); p.scrollIntoView({behavior:'smooth',block:'start'});
+}
+const head=id=>{const e=EXPS.find(x=>x.id===id);return `<button class="back">🏠 رجوع إلى التجارب</button><h2>${e.em} ${e.title}</h2>`};
+
+/* ordering game: tap items in the correct order */
+function orderGame(id,intro,items){ // items in correct order [[emoji,label],...]
+  const shuffled=[...items].sort(()=>Math.random()-.5);
+  return head(id)+`<p>${intro}</p><div class="lab"><div class="choices" id="pool">${shuffled.map((it,i)=>`<button data-i="${items.indexOf(it)}">${it[0]} ${it[1]}</button>`).join('')}</div>
+  <div class="chain" id="chain"><span style="opacity:.4;font-size:18px">اضغط على العناصر بالترتيب الصحيح</span></div><div class="result" id="ores"></div><button class="big" id="reset">ابدأ من جديد</button></div>`;
+}
+function initOrder(p,id,items,points){
+  let next=0; const chain=p.querySelector('#chain');
+  const reset=()=>{next=0;chain.innerHTML='';p.querySelector('#ores').textContent='';p.querySelectorAll('#pool button').forEach(b=>b.classList.remove('used'))};
+  p.querySelectorAll('#pool button').forEach(b=>b.onclick=()=>{
+    if(+b.dataset.i!==next){toast('ليس هذا التالي… فكّر مرة أخرى 🤔');return}
+    if(next>0) chain.insertAdjacentHTML('beforeend','<span class="arrow">←</span>');
+    chain.insertAdjacentHTML('beforeend',`<span>${items[next][0]}</span>`); b.classList.add('used'); next++;
+    if(next===items.length){p.querySelector('#ores').textContent='ترتيب صحيح! 🎉';award(id,points,'ترتيب كامل')}
+  });
+  p.querySelector('#reset').onclick=reset;
+}
+
+/* classify game: one item at a time, pick its category */
+function classifyGame(id,intro,cats){
+  return head(id)+`<p>${intro}</p><div class="lab"><div class="item" id="item"></div><div class="choices" id="cats" style="justify-content:center">${cats.map((c,i)=>`<button data-c="${i}">${c}</button>`).join('')}</div>
+  <div class="result" id="cres" style="text-align:center"></div><div id="prog" style="text-align:center;opacity:.7"></div></div>`;
+}
+function initClassify(p,id,items){
+  let i=0,correct=0; const it=p.querySelector('#item');
+  const show=()=>{it.textContent=items[i][0];p.querySelector('#prog').textContent=`${i+1} من ${items.length}`;p.querySelector('#cres').textContent='';};
+  p.querySelectorAll('#cats button').forEach(b=>b.onclick=()=>{
+    if(i>=items.length) return;
+    const ok=+b.dataset.c===items[i][1]; if(ok){correct++;p.querySelector('#cres').textContent='صحيح! 👏'} else p.querySelector('#cres').textContent='ليس تماماً… الإجابة: '+p.querySelectorAll('#cats button')[items[i][1]].textContent;
+    i++; setTimeout(()=>{ if(i<items.length) show(); else { it.textContent='🎉'; p.querySelector('#prog').textContent=`أصبت ${correct} من ${items.length}`; award(id,5+correct*2,`أصبت ${correct} من ${items.length}`); } },900);
+  });
+  show();
+}
+
+/* ======================================================
+   المحاكاة
+   ====================================================== */
+const CHAIN=[['🌱','عشب'],['🦗','جندب'],['🐸','ضفدع'],['🐍','ثعبان'],['🦅','نسر']];
+const LIFE=[['🥚','بيضة'],['🐛','يرقة'],['🟤','شرنقة'],['🦋','فراشة']];
+const FROG=[['🥚','بيض في الماء'],['🐟','أبو ذنيبة'],['🦎','ضفدع صغير بذيل'],['🐸','ضفدع بالغ']];
+const EAR=[['👂','صيوان الأذن'],['🕳️','قناة السمع'],['🥁','طبلة الأذن'],['🦴','العظيمات الثلاث'],['🐚','القوقعة'],['🧠','العصب السمعي إلى الدماغ']];
+
+const BUILD={
+ circuit:()=>head('circuit')+`<p>الدائرة تحتاج: بطارية، أسلاك تصل الطرفين، ومفتاح مغلق. جرّب!</p>
+  <div class="lab"><svg viewBox="0 0 320 170" style="width:100%;max-width:420px;display:block;margin:auto">
+   <rect x="20" y="20" width="280" height="130" rx="14" fill="none" stroke="#1B2A49" stroke-width="6" id="wireL"/>
+   <rect x="130" y="128" width="60" height="44" fill="#EAF6FF" id="gap"/>
+   <rect x="120" y="135" width="80" height="30" rx="6" fill="#1B2A49"/><text x="160" y="157" text-anchor="middle" fill="#FFD23F" font-size="18" font-weight="700">بطارية</text>
+   <rect x="20" y="60" width="0" height="50" fill="#EAF6FF"/>
+   <line id="sw" x1="200" y1="20" x2="240" y2="-10" stroke="#FF6B57" stroke-width="7" stroke-linecap="round"/><rect x="195" y="10" width="70" height="20" fill="#EAF6FF" id="swgap"/>
+   <circle cx="195" cy="20" r="7" fill="#1B2A49"/><circle cx="265" cy="20" r="7" fill="#1B2A49"/>
+   <circle id="bulb" cx="160" cy="70" r="30" fill="#ddd" stroke="#1B2A49" stroke-width="5"/><text x="160" y="80" text-anchor="middle" font-size="30">💡</text>
+   <rect x="20" y="70" width="0" height="30" fill="#EAF6FF"/>
+  </svg>
+  <div class="choices" style="margin-top:12px;justify-content:center"><button id="swBtn">أغلق المفتاح 🔘</button><button id="wireBtn">اقطع السلك ✂️</button></div>
+  <div class="result" id="cres" style="text-align:center"></div></div>`,
+ chain:()=>orderGame('chain','ابدأ بمن يصنع غذاءه بنفسه (المنتِج)، ثم من يأكله… حتى آخر السلسلة.',CHAIN),
+ states:()=>head('states')+`<p>حرّك الحرارة وراقب الجزيئات!</p><div class="lab"><div class="controls"><label>🌡️ الحرارة <input type="range" id="temp" min="-30" max="130" value="20"><b id="tv">20°</b></label></div>
+  <div class="box" id="box" style="margin-top:12px"></div><div class="result" id="sres"></div><div id="visited" style="opacity:.7"></div></div>`,
+ butterfly:()=>orderGame('butterfly','رتّب مراحل حياة الفراشة من البداية.',LIFE),
+ attract:()=>head('attract')+`<p>اختر شيئاً، خمّن، ثم قرّب المغناطيس.</p><div class="lab"><div class="choices" id="objs"></div>
+  <div class="choices" style="margin-top:10px"><button data-g="yes">أعتقد أنه يُجذب ✅</button><button data-g="no">أعتقد أنه لا يُجذب ❌</button></div>
+  <div class="mag"><span class="m" id="mobj">❓</span><span>🧲</span></div><div class="result" id="mres"></div></div>`,
+ earpath:()=>orderGame('earpath','الصوت يدخل من الخارج ويمر بأجزاء الأذن حتى يصل إلى الدماغ. رتّب رحلته!',EAR),
+ pitch:()=>head('pitch')+`<p>الصوت موجة. اهتزاز سريع = صوت حاد، اهتزاز بطيء = صوت غليظ.</p><div class="lab"><div class="controls">
+  <label>🎵 الحدّة <input type="range" id="freq" min="100" max="1000" value="400"></label><label>🔊 الشدة <input type="range" id="vol" min="0" max="100" value="50"></label></div>
+  <canvas class="wave" id="wave" width="600" height="120" style="margin-top:12px"></canvas>
+  <div class="choices" style="margin-top:10px;justify-content:center"><button id="play">اسمع الصوت ▶️</button></div><div class="result" id="pres" style="text-align:center"></div></div>`,
+
+
+ conduct:()=>classifyGame('conduct','ضع كل مادة في الدائرة: هل يضيء المصباح؟',['يضيء 💡 (موصل)','لا يضيء ⚫ (عازل)']),
+ eaters:()=>classifyGame('eaters','صنّف كل كائن حسب غذائه.',['منتِج 🌱','آكل أعشاب 🐰','آكل لحوم 🦁']),
+ sort:()=>classifyGame('sort','ما حالة هذه المادة؟',['صلب 🧊','سائل 💧','غاز 💨']),
+ frog:()=>orderGame('frog','رتّب مراحل حياة الضفدع من البداية.',FROG),
+ poles:()=>head('poles')+`<p>لكل مغناطيس قطبان: شمالي (N) وجنوبي (S). اقلب المغناطيس وقرّبه!</p><div class="lab">
+  <div class="mag" style="gap:40px"><div class="m" id="m1"><span class="pole n">N</span><span class="pole s">S</span></div><div class="m" id="m2"><span class="pole n">N</span><span class="pole s">S</span></div></div>
+  <div class="choices" style="justify-content:center"><button id="flip">اقلب المغناطيس الثاني 🔄</button><button id="near">قرّبهما ➡️⬅️</button></div>
+  <div class="result" id="polres" style="text-align:center"></div></div>`,
+ earjob:()=>classifyGame('earjob','اقرأ الوظيفة واختر الجزء الذي يقوم بها.',EAR.map(e=>e[1])),
+ lab:()=>head('lab')+`<p>في الدائرة المتسلسلة: بطاريات أكثر = دفع أقوى = تيار أكبر. مصابيح أكثر على نفس البطارية = التيار يُقسَّم = ضوء أخفت.</p>
+  <div class="lab"><div class="controls"><label>🔋 عدد البطاريات <input type="range" id="bat" min="1" max="3" value="1"><b id="batv">1</b></label><label>💡 عدد المصابيح <input type="range" id="bul" min="1" max="3" value="1"><b id="bulv">1</b></label></div>
+  <div id="bulbs" style="text-align:center;font-size:54px;margin:12px 0;letter-spacing:8px"></div>
+  <div>شدة التيار:</div><div class="meter"><i id="cur" style="width:33%"></i></div><div class="result" id="labres" style="text-align:center"></div>
+  <div class="lab" style="background:#FFF8DC"><b>تحدّياتك:</b><div id="tasks"></div></div></div>`,
+ web:()=>head('web')+`<p>في الغابة: العشب يأكله الأرنب، والأرنب يأكله الثعلب. خمّن ماذا سيحدث ثم جرّب!</p>
+  <div class="lab"><div class="bars"><div class="bar"><i id="bg" style="height:60%;background:#3DCC7A"></i><b>🌿</b></div><div class="bar"><i id="br" style="height:50%;background:#FFD23F"></i><b>🐰</b></div><div class="bar"><i id="bf" style="height:40%;background:#FF6B57"></i><b>🦊</b></div></div>
+  <div class="choices" style="justify-content:center"><button data-s="fox">اختفى الثعلب 🦊❌</button><button data-s="rabbit">اختفى الأرنب 🐰❌</button><button data-s="grass">جفّ العشب 🌿❌</button><button data-s="reset">أعد التوازن 🔄</button></div>
+  <div class="result" id="webres" style="text-align:center"></div><div id="webprog" style="text-align:center;opacity:.7"></div></div>`,
+ changes:()=>classifyGame('changes','ما اسم هذا التغيّر؟',['ذوبان 🧊➡️💧','تجمّد 💧➡️🧊','تبخّر 💧➡️💨','تكاثف 💨➡️💧']),
+ meta:()=>classifyGame('meta','كيف ينمو هذا الكائن؟',['تحوّل كامل (بيضة، يرقة، شرنقة، بالغ)','تحوّل غير كامل (بيضة، حورية تشبه البالغ، بالغ)','بلا تحوّل (يولد يشبه والديه)']),
+ force:()=>head('force')+`<p>هل تضعف قوة المغناطيس مع البعد؟ وهل تمر عبر الحواجز؟</p><div class="lab">
+  <div class="controls"><label>📏 المسافة <input type="range" id="dist" min="0" max="10" value="0"><b id="distv">0 سم</b></label></div>
+  <div class="choices" style="margin-top:10px">حاجز: <button data-b="none" aria-pressed="true">بدون</button><button data-b="paper">ورقة 📄</button><button data-b="wood">خشب 🪵</button><button data-b="iron">صفيحة حديد 🔩</button></div>
+  <div style="text-align:center;font-size:44px;margin:12px 0">🧲<span id="gapv"></span><span id="clips"></span></div>
+  <div class="result" id="fres" style="text-align:center"></div><div id="fprog" style="text-align:center;opacity:.7"></div></div>`,
+ earzones:()=>classifyGame('earzones','إلى أي قسم من الأذن ينتمي هذا الجزء؟',['الأذن الخارجية','الأذن الوسطى','الأذن الداخلية']),
+ medium:()=>head('medium')+`<p>الصوت يحتاج مادة لينتقل فيها. اضغط "ابدأ السباق" وشاهد من يصل أولاً!</p><div class="lab">
+  <div class="race"><div class="lane"><b>🔩 حديد</b><div class="tr"><span id="l3">🔊</span></div></div><div class="lane"><b>💧 ماء</b><div class="tr"><span id="l2">🔊</span></div></div><div class="lane"><b>💨 هواء</b><div class="tr"><span id="l1">🔊</span></div></div><div class="lane"><b>🌌 فراغ</b><div class="tr"><span id="l0">🔊</span></div></div></div>
+  <div class="choices" style="justify-content:center;margin-top:12px"><button id="race">ابدأ السباق 🏁</button></div>
+  <div class="q" id="mq"><p>بعد السباق: أين ينتقل الصوت أسرع؟</p><button class="opt" data-ok="false">الهواء</button><button class="opt" data-ok="false">الماء</button><button class="opt" data-ok="true">الحديد</button><button class="opt" data-ok="false">الفراغ</button></div>
+  <div class="result" id="mres" style="text-align:center"></div></div>`,
+ sounds:()=>classifyGame('sounds','استمع في خيالك… هل هذا الصوت حاد أم غليظ؟',['حاد 🐦','غليظ 🐻']),
+};
+
+const INIT={
+ circuit:p=>{
+  let closed=false, wire=true; const sw=p.querySelector('#sw'),bulb=p.querySelector('#bulb'),gap=p.querySelector('#gap');
+  function upd(){
+    sw.setAttribute('x2',closed?265:240); sw.setAttribute('y2',closed?20:-10);
+    gap.setAttribute('x',wire?300:40); gap.style.display=wire?'none':'block'; gap.setAttribute('y',12);gap.setAttribute('height',16);gap.setAttribute('width',40);
+    const on=closed&&wire; bulb.setAttribute('fill',on?'#FFD23F':'#ddd');
+    p.querySelector('#swBtn').textContent=closed?'افتح المفتاح 🔓':'أغلق المفتاح 🔘';
+    p.querySelector('#wireBtn').textContent=wire?'اقطع السلك ✂️':'أعد السلك 🔗';
+    p.querySelector('#cres').textContent = on?'أضاء المصباح! الدائرة مغلقة والتيار يمر ⚡':!wire?'السلك مقطوع… الدائرة مفتوحة':'المفتاح مفتوح… لا يمر التيار';
+    if(on) award('circuit',10,'أضأت المصباح');
+  }
+  p.querySelector('#swBtn').onclick=()=>{closed=!closed;upd()}; p.querySelector('#wireBtn').onclick=()=>{wire=!wire;upd()}; upd();
+ },
+ chain:p=>initOrder(p,'chain',CHAIN,10),
+ butterfly:p=>initOrder(p,'butterfly',LIFE,10),
+ earpath:p=>initOrder(p,'earpath',EAR,15),
+ states:p=>{
+  const box=p.querySelector('#box'); const N=20; const ps=[];
+  for(let i=0;i<N;i++){const d=document.createElement('div');d.className='p';box.appendChild(d);ps.push(d)}
+  const seen=new Set(); let timer;
+  function layout(state){
+    ps.forEach((d,i)=>{
+      if(state==='solid'){d.style.left=(20+(i%5)*30)+'px';d.style.top=(60+Math.floor(i/5)*28)+'px';d.style.background='#9ad0ff'}
+      else if(state==='liquid'){d.style.left=(10+Math.random()*(box.clientWidth-40))+'px';d.style.top=(90+Math.random()*70)+'px';d.style.background='#4FB3FF'}
+      else{d.style.left=(Math.random()*(box.clientWidth-30))+'px';d.style.top=(Math.random()*(box.clientHeight-30))+'px';d.style.background='#cfe9ff'}
+    });
+  }
+  function upd(){
+    const t=+p.querySelector('#temp').value; p.querySelector('#tv').textContent=t+'°';
+    const state=t<0?'solid':t<100?'liquid':'gas'; seen.add(state);
+    p.querySelector('#sres').textContent = state==='solid'?'🧊 جليد (صلب): الجزيئات متماسكة ولا تتحرك':state==='liquid'?'💧 ماء (سائل): الجزيئات تنزلق فوق بعضها':'♨️ بخار (غاز): الجزيئات تطير بحرية';
+    p.querySelector('#visited').textContent=`شاهدت ${seen.size} من 3 حالات`;
+    clearInterval(timer); layout(state); if(state!=='solid') timer=setInterval(()=>layout(state),state==='gas'?700:1200);
+    if(seen.size===3) award('states',10,'شاهدت الحالات الثلاث');
+  }
+  p.querySelector('#temp').oninput=upd; upd();
+ },
+ attract:p=>{
+  const objs=[['📎','مشبك حديد','yes'],['🥄','ملعقة حديد','yes'],['🔑','مفتاح حديد','yes'],['🧱','قطعة بلاستيك','no'],['📄','ورقة','no'],['🪵','قطعة خشب','no']];
+  const box=p.querySelector('#objs'); let cur=null; const tried=new Set();
+  objs.forEach(([e,n,a])=>{const b=document.createElement('button');b.textContent=e+' '+n;b.dataset.a=a;b.dataset.e=e;b.onclick=()=>{box.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));cur=b;const o=p.querySelector('#mobj');o.textContent=e;o.style.transform='';p.querySelector('#mres').textContent=''};box.appendChild(b)});
+  p.querySelectorAll('[data-g]').forEach(g=>g.onclick=()=>{
+    if(!cur) return toast('اختر شيئاً أولاً'); const ans=cur.dataset.a, o=p.querySelector('#mobj');
+    o.style.transform= ans==='yes'?'translateX(-40px)':'translateX(30px)';
+    p.querySelector('#mres').textContent=(g.dataset.g===ans?'أحسنت! ':'أوه! ')+(ans==='yes'?'المغناطيس يجذبه لأنه من الحديد 🧲':'لا يُجذب لأنه ليس من الحديد');
+    tried.add(cur.dataset.e); if(tried.size>=4) award('attract',10,'جرّبت 4 أشياء');
+  });
+ },
+ pitch:p=>{
+  const c=p.querySelector('#wave'),ctx=c.getContext('2d'),f=p.querySelector('#freq'),v=p.querySelector('#vol'); let heard=new Set();
+  function draw(){ctx.clearRect(0,0,c.width,c.height);ctx.beginPath();ctx.lineWidth=4;ctx.strokeStyle='#FF6B57';const A=(v.value/100)*50,k=f.value/60;for(let x=0;x<c.width;x++){const y=60+Math.sin(x/c.width*k*Math.PI*2)*A;x?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
+    p.querySelector('#pres').textContent=(f.value>600?'صوت حاد 🐦':f.value<250?'صوت غليظ 🐻':'صوت متوسط')+(v.value<20?' وهامس':v.value>80?' وقوي':'');}
+  f.oninput=draw;v.oninput=draw;draw();
+  p.querySelector('#play').onclick=()=>{
+    try{const ac=new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f.value;g.gain.value=v.value/100*0.3;o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+0.8);}catch(e){}
+    heard.add(f.value>600?'high':f.value<250?'low':'mid');
+    if(heard.has('high')&&heard.has('low')) award('pitch',10,'سمعت الحاد والغليظ');
+    else toast('الآن جرّب صوتاً '+(heard.has('high')?'غليظاً 🐻':'حاداً 🐦'));
+  };
+ },
+ conduct:p=>initClassify(p,'conduct',[['🥄 ملعقة حديد',0],['✏️ ممحاة',1],['🔑 مفتاح',0],['📄 ورقة',1],['🪙 عملة معدنية',0],['🪵 عصا خشب',1],['📎 مشبك',0],['🧸 دمية قماش',1]]),
+ eaters:p=>initClassify(p,'eaters',[['🌳 شجرة',0],['🐰 أرنب',1],['🦁 أسد',2],['🌾 قمح',0],['🐄 بقرة',1],['🦅 نسر',2],['🐛 دودة أوراق',1],['🐍 ثعبان',2]]),
+ sort:p=>initClassify(p,'sort',[['🪨 حجر',0],['🥛 حليب',1],['🎈 هواء البالون',2],['🧊 مكعب ثلج',0],['🫧 بخار الغلاية',2],['🍯 عسل',1],['🪑 كرسي',0],['🧃 عصير',1]]),
+ frog:p=>initOrder(p,'frog',FROG,10),
+ poles:p=>{
+  let flipped=false; const seen=new Set(); const m1=p.querySelector('#m1'),m2=p.querySelector('#m2');
+  p.querySelector('#flip').onclick=()=>{flipped=!flipped;m2.style.flexDirection=flipped?'row-reverse':'row';m1.style.transform=m2.style.transform='';p.querySelector('#polres').textContent='';};
+  p.querySelector('#near').onclick=()=>{
+    // m1 shows N..S (right to left in RTL): facing poles are S of m1 and N of m2 when not flipped
+    const attract=!flipped; seen.add(attract);
+    m1.style.transform=attract?'translateX(-30px)':'translateX(30px)'; m2.style.transform=attract?'translateX(30px)':'translateX(-30px)';
+    p.querySelector('#polres').textContent=attract?'قطبان مختلفان (S و N)… يتجاذبان! 🧲':'قطبان متشابهان… يتنافران! ↔️';
+    if(seen.size===2) award('poles',10,'رأيت التجاذب والتنافر'); else toast('الآن اقلب المغناطيس وقرّبهما مرة أخرى');
+  };
+ },
+ earjob:p=>initClassify(p,'earjob',[['يجمع الصوت من الخارج',0],['ممر يدخل منه الصوت إلى الداخل',1],['غشاء رقيق يهتز عندما يصله الصوت',2],['ثلاث عظام صغيرة تنقل الاهتزاز',3],['جزء حلزوني يحوّل الاهتزاز إلى إشارة',4],['يوصل الإشارة إلى الدماغ',5]]),
+ lab:p=>{
+  const bat=p.querySelector('#bat'),bul=p.querySelector('#bul'); const done={bright:false,dim:false,equal:false};
+  const tasks=[['bright','اجعل المصابيح تضيء بأقوى ما يمكن'],['dim','اجعل المصابيح تضيء بأخفت ما يمكن'],['equal','3 بطاريات و3 مصابيح: قارن مع بطارية ومصباح']];
+  function upd(){
+    const B=+bat.value,L=+bul.value; p.querySelector('#batv').textContent=B;p.querySelector('#bulv').textContent=L;
+    const I=B/L; const pct=Math.min(100,I/3*100); p.querySelector('#cur').style.width=pct+'%';
+    const glow=I>=2?'💡':I>=1?'🔆':'🔅'; p.querySelector('#bulbs').innerHTML=glow.repeat(L)+`<div style="font-size:16px;letter-spacing:0">${'🔋'.repeat(B)}</div>`;
+    p.querySelector('#labres').textContent = `شدة التيار ≈ ${I.toFixed(1)} — `+(I>=3?'أقوى إضاءة! ⚡':I<=0.34?'أخفت إضاءة… التيار موزّع على 3 مصابيح':I===1?'إضاءة عادية':I>1?'أقوى من العادي':'أخفت من العادي');
+    if(B===3&&L===1) done.bright=true; if(B===1&&L===3) done.dim=true; if(B===3&&L===3) done.equal=true;
+    p.querySelector('#tasks').innerHTML=tasks.map(t=>`<div>${done[t[0]]?'✅':'⬜'} ${t[1]}</div>`).join('');
+    if(done.bright&&done.dim&&done.equal) award('lab',20,'أتممت تحديات الدائرة');
+  }
+  bat.oninput=bul.oninput=upd; upd();
+ },
+ web:p=>{
+  const base={g:60,r:50,f:40}; const seen=new Set();
+  const set=(g,r,f)=>{p.querySelector('#bg').style.height=g+'%';p.querySelector('#br').style.height=r+'%';p.querySelector('#bf').style.height=f+'%'};
+  const msg={fox:'بلا ثعلب: الأرانب تتكاثر 🐰🐰🐰 ثم تأكل العشب كله… فتجوع!',rabbit:'بلا أرنب: العشب ينمو كثيراً 🌿 لكن الثعلب لا يجد طعاماً 🦊📉',grass:'بلا عشب: الأرانب تجوع وتقل، ثم الثعالب بعدها. الكل مرتبط!',reset:'عاد التوازن: كل كائن يعتمد على الآخر ⚖️'};
+  p.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.s; if(k==='fox')set(15,95,0); else if(k==='rabbit')set(100,0,10); else if(k==='grass')set(0,10,8); else set(base.g,base.r,base.f);
+    p.querySelector('#webres').textContent=msg[k]; if(k!=='reset') seen.add(k);
+    p.querySelector('#webprog').textContent=`جرّبت ${seen.size} من 3 حالات`;
+    if(seen.size===3) award('web',20,'فهمت توازن السلسلة');
+  });
+ },
+ changes:p=>initClassify(p,'changes',[['🧊 ثلج في الشمس يتحول إلى ماء',0],['💧 ماء في المجمّد يصبح جليداً',1],['🫧 ماء يغلي في القدر ويخرج بخاراً',2],['🥤 قطرات ماء تظهر على كوب بارد',3],['🍫 شوكولاتة تسيح في اليد',0],['👕 ثوب مبلل يجف على الحبل',2],['🪟 ضباب على زجاج الحمام الدافئ',3],['🍭 مصاصة سائلة تتصلب عند تبريدها',1]]),
+ meta:p=>initClassify(p,'meta',[['🦋 فراشة',0],['🦗 جراد',1],['🐱 قطة',2],['🐝 نحلة',0],['🪳 صرصور',1],['👶 إنسان',2],['🪲 خنفساء',0],['🦟 يعسوب',1]]),
+ force:p=>{
+  let barrier='none'; const seen=new Set(); const d=p.querySelector('#dist');
+  p.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{barrier=b.dataset.b;p.querySelectorAll('[data-b]').forEach(x=>x.setAttribute('aria-pressed',x===b));if(barrier!=='none')seen.add('barrier');upd()});
+  function upd(){
+    const D=+d.value; p.querySelector('#distv').textContent=D+' سم';
+    let n=Math.max(0,5-Math.ceil(D/2)); if(barrier==='iron') n=0;
+    p.querySelector('#gapv').textContent=(barrier==='paper'?'📄':barrier==='wood'?'🪵':barrier==='iron'?'🔩':'')+'·'.repeat(D);
+    p.querySelector('#clips').textContent='📎'.repeat(n)||'—';
+    p.querySelector('#fres').textContent = barrier==='iron'?'صفيحة الحديد تحجب المغناطيس… لا يجذب شيئاً!':n===0?'بعيد جداً… القوة اختفت':n===5?'أقوى جذب! الأقرب هو الأقوى':`الجذب أضعف: ${n} مشابك فقط`+(barrier!=='none'?' (الحاجز غير المعدني لا يمنع)':'');
+    if(n===5)seen.add('near'); if(n===0&&barrier!=='iron')seen.add('far'); if(barrier==='iron')seen.add('iron');
+    p.querySelector('#fprog').textContent=`اكتشفت ${seen.size} من 4 أشياء`;
+    if(seen.size===4) award('force',20,'اكتشفت قوانين المغناطيس');
+  }
+  d.oninput=upd; upd();
+ },
+ earzones:p=>initClassify(p,'earzones',[['صيوان الأذن',0],['قناة السمع',0],['طبلة الأذن',1],['العظيمات الثلاث (المطرقة، السندان، الركاب)',1],['القوقعة',2],['القنوات الهلالية (التوازن)',2],['العصب السمعي',2]]),
+ medium:p=>{
+  let raced=false;
+  p.querySelector('#race').onclick=()=>{
+    raced=true; [['l3',0.5],['l2',1.2],['l1',2.8]].forEach(([id,t])=>{const e=p.querySelector('#'+id);e.style.transition=`right ${t}s linear`;e.style.right='calc(100% - 30px)'});
+    p.querySelector('#mres').textContent='الحديد وصل أولاً، ثم الماء، ثم الهواء… والفراغ لا صوت فيه إطلاقاً (لا توجد جزيئات تنقله)';
+  };
+  p.querySelectorAll('#mq .opt').forEach(o=>o.onclick=()=>{
+    if(!raced) return toast('ابدأ السباق أولاً 🏁'); if(p.querySelector('#mq').dataset.a) return; p.querySelector('#mq').dataset.a=1;
+    if(o.dataset.ok==='true'){o.classList.add('ok');award('medium',20,'إجابة صحيحة')} else {o.classList.add('bad');p.querySelector('#mq [data-ok=true]').classList.add('ok');award('medium',10,'انظر للإجابة الصحيحة')}
+  });
+ },
+ sounds:p=>initClassify(p,'sounds',[['🐦 عصفور',0],['🦁 زئير أسد',1],['🔔 جرس صغير',0],['⛈️ رعد',1],['🎺 صفارة',0],['🥁 طبل كبير',1],['🐭 فأر',0],['🐄 بقرة',1]]),
+};
+
+/* ---------- badges & board ---------- */
+function renderBadges(){ const s=name&&students[name]?students[name]:blank(); $('#badges').innerHTML=BADGES.map(b=>`<div class="badge ${s.badges.includes(b.id)?'won':''}"><div class="em">${b.em}</div><b>${b.name}</b></div>`).join(''); }
+function renderBoard(){
+  const rows=Object.entries(students).filter(([k,s])=>!SID||s.sid===SID).sort((a,b)=>b[1].pts-a[1].pts);
+  $('#board').className='board'+(SID?' s':''); $('#board').innerHTML=`<div class="hdr"><span>${db?'<span class="live"></span>':''}الطالب</span><span>الصف</span>${SID?'':'<span>المدرسة</span>'}<span>النقاط</span></div>`+
+   (rows.length?rows.map(([k,s],i)=>`<div class="${k===name?'me':''} ${i<3?'top3':''}"><span>${['🥇','🥈','🥉'][i]||(i+1)} ${s.name}</span><span>${s.cls}</span>${SID?'':`<span>${s.school}</span>`}<span>${s.pts} ⭐<small>${s.done.length}/${EXPS.length} تجربة</small></span></div>`).join(''):`<div class="empty">لا أحد بعد… كن أول المكتشفين!</div>`);
+  $('#boardNote').textContent = db?'اللوحة مشتركة وتتحدث مباشرة لجميع الطلاب':'النتائج محفوظة على هذا الجهاز فقط';
+}
+/* ---------- لوحة المعلم / المشرفة ---------- */
+$('#teacher').onclick=()=>{
+  const pin=prompt(SCHOOL?`الرقم السري لـ ${SCHOOL.name}:`:'الرقم السري للمشرفة:');
+  if(pin!==(SCHOOL?SCHOOL.pin:ADMIN_PIN)) return toast('رقم غير صحيح');
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',false));
+  ['exp','badges','board'].forEach(t=>$('#tab-'+t).hidden=true); $('#tab-teacher').hidden=false; renderTeacher();
+};
+function mine(){ return Object.entries(students).filter(([k,s])=>!SID||s.sid===SID); }
+function renderTeacher(){
+  const rows=mine().sort((a,b)=>b[1].pts-a[1].pts);
+  const links = !SCHOOL ? `<div class="lab"><b>روابط المدارس (أعطي كل محضّر رابطه ورقمه السري):</b>${Object.entries(SCHOOLS).map(([id,sc])=>`<div style="font-size:15px;direction:ltr;text-align:left;word-break:break-all">${location.origin+location.pathname}?school=${id} <span dir="rtl">— ${sc.name} (الرقم: ${sc.pin})</span></div>`).join('')||'<div style="opacity:.7">لم تُضف مدارس بعد. أضيفيها في SCHOOLS داخل الملف.</div>'}</div>`:'';
+  $('#tab-teacher').innerHTML=`<h2 style="margin:0 0 8px">📋 ${SCHOOL?SCHOOL.name:'كل المدارس'} — ${rows.length} طالب</h2>
+   <div class="choices"><button id="csv">تحميل Excel 📥</button><button id="wipe" style="border-color:var(--coral);color:var(--coral)">تصفير النتائج 🗑️</button><button id="closeT">إغلاق ✖️</button></div>${links}
+   <div class="board" style="margin-top:12px"><div class="hdr t"><span>الطالب</span><span>الصف</span>${SCHOOL?'':'<span>المدرسة</span>'}<span>النقاط</span><span>التجارب</span><span></span></div>
+   ${rows.map(([k,s])=>`<div class="t"><span>${s.name}</span><span>${s.cls}</span>${SCHOOL?'':`<span>${s.school}</span>`}<span>${s.pts}</span><span>${s.done.length}/${EXPS.length}</span><span><button data-del="${k}" style="background:none;color:var(--coral);padding:0">حذف</button></span></div>`).join('')||'<div class="empty">لا نتائج بعد</div>'}</div>
+   <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">تفاصيل التجارب لكل طالب</summary>${rows.map(([k,s])=>`<div style="margin:8px 0;font-size:15px"><b>${s.name} (${s.cls})</b>: ${EXPS.map(e=>s.done.includes(e.id)?'✅':'⬜').join('')}</div>`).join('')}<div style="font-size:13px;opacity:.7">ترتيب المربعات = ترتيب التجارب في الصفحة</div></details>`;
+  $('#csv').onclick=()=>{
+    const head=['الاسم','الصف','المدرسة','النقاط','عدد التجارب',...EXPS.map(e=>e.title)];
+    const lines=[head,...rows.map(([k,s])=>[s.name,s.cls,s.school,s.pts,s.done.length,...EXPS.map(e=>s.done.includes(e.id)?'✓':'')])];
+    const csv='\uFEFF'+lines.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`نادي-العلوم-${SCHOOL?SCHOOL.name:'كل-المدارس'}.csv`;a.click();
+  };
+  $('#wipe').onclick=()=>{ if(!confirm('حذف جميع نتائج '+(SCHOOL?SCHOOL.name:'كل المدارس')+'؟')) return; rows.forEach(([k])=>removeStudent(k)); renderTeacher(); toast('تم التصفير'); };
+  $('#closeT').onclick=()=>{ $('#tab-teacher').hidden=true; document.querySelector('nav button').click(); };
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('حذف '+students[b.dataset.del].name+'؟')){ removeStudent(b.dataset.del); renderTeacher(); } });
+}
+function removeStudent(k){ delete students[k]; if(db) db.ref('students/'+k).remove(); else local.set('club.students',students); if(k===name){name='';local.set('club.name','');} renderScore(); renderCards(); }
+if(SCHOOL) $('#schoolName').textContent=SCHOOL.name;
+renderScore(); renderCards();
+</script>
+</body>
+</html>
