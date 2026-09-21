@@ -146,8 +146,9 @@ footer button{background:none;color:inherit;text-decoration:underline;padding:0}
       <div><h1>نادي العلوم</h1><p id="schoolName" style="margin:6px 0 0;font-size:22px;font-weight:700;color:var(--sun)"></p><p id="sub">جرّب، واكتشف، واجمع النقاط!</p></div>
     </div>
     <div class="who">
-      <div class="row"><label for="nameIn">الاسم:</label><input id="nameIn" placeholder="اكتب الاسم" autocomplete="off" aria-label="اسم الطالب"></div>
-      <div class="row"><label for="clsIn">الصف:</label><input id="clsIn" placeholder="اكتب الصف" autocomplete="off" aria-label="الصف"></div>
+      <div class="row"><label for="codeIn">الرمز:</label><input id="codeIn" placeholder="رمز البطاقة" inputmode="numeric" autocomplete="off" aria-label="رمز الدخول" style="direction:ltr;text-align:center;letter-spacing:2px"></div>
+      <div class="row"><label for="nameIn">الاسم:</label><input id="nameIn" placeholder="اكتب اسمك (أول مرة فقط)" autocomplete="off" aria-label="اسم الطالب"></div>
+      <div id="whoNow" style="display:none;font-weight:700;margin-bottom:10px"></div>
       <input id="schIn" type="hidden">
       <div class="row2"><button id="nameBtn">ابدأ</button><div class="score">نقاطي <b id="pts">0</b> ⭐</div></div>
     </div>
@@ -241,10 +242,10 @@ const BADGES = [
    ====================================================== */
 const local = {get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let students = local.get('club.students',{});
-Object.keys(students).forEach(k=>{const x=students[k]; students[k]={name:x.name||k,cls:x.cls||'',school:x.school||'',sid:x.sid||'',pts:x.pts||0,done:x.done||[],badges:x.badges||[]}});
+Object.keys(students).forEach(k=>{const x=students[k]; students[k]={name:x.name||k,cls:x.cls||'',school:x.school||'',sid:x.sid||'',h:x.h||'',pts:x.pts||0,done:x.done||[],badges:x.badges||[]}});
 let name = local.get('club.name','') || ''; if(typeof name!=='string') name='';
 let db = null;
-const blank=(n='',c='',sc='')=>({name:n,cls:c,school:sc,sid:SID,pts:0,done:[],badges:[]});
+const blank=(n='',c='',sc='',h='')=>({name:n,cls:c,school:sc,sid:SID,h:h,pts:0,done:[],badges:[]});
 const key=n=>n.replace(/[.#$\[\]\/]/g,'');
 const me=()=> students[name] || (students[name]=blank());
 function save(){
@@ -259,16 +260,16 @@ if(FIREBASE_CONFIG){
   const s2=document.createElement('script'); s2.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js';
   s1.onload=()=>document.head.appendChild(s2);
   s2.onload=()=>{ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database();
-    db.ref('students').on('value',snap=>{ const v=snap.val()||{}; students={}; Object.entries(v).forEach(([k,s])=>students[k]={name:s.name||k,cls:s.cls||'',school:s.school||'',sid:s.sid||'',pts:s.pts||0,done:s.done||[],badges:s.badges||[]}); renderScore(); renderCards(); if(!$('#tab-board').hidden) renderBoard(); }); };
+    db.ref('students').on('value',snap=>{ const v=snap.val()||{}; students={}; Object.entries(v).forEach(([k,s])=>students[k]={name:s.name||k,cls:s.cls||'',school:s.school||'',sid:s.sid||'',h:s.h||'',pts:s.pts||0,done:s.done||[],badges:s.badges||[]}); renderScore(); renderCards(); if(!$('#tab-board').hidden) renderBoard(); }); };
   document.head.appendChild(s1);
 }
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e.t);e.t=setTimeout(()=>e.classList.remove('show'),2200)}
-function renderScore(){ const s=students[name]; $('#pts').textContent = s? s.pts : 0; $('#nameIn').value=''; $('#clsIn').value=''; }
+function renderScore(){ const s=students[name]; $('#pts').textContent = s? s.pts : 0; const w=$('#whoNow'); if(s&&name){ w.style.display='block'; w.textContent=`👋 ${s.name} — ${s.cls}`; $('#nameIn').style.display='none'; $('#codeIn').value=''; $('#nameIn').value=''; $('#nameBtn').textContent='تبديل'; } else { w.style.display='none'; $('#nameIn').style.display=''; $('#nameBtn').textContent='ابدأ'; } }
 function award(id,points,label){
-  if(!name){ toast('اكتب اسمك أولاً في الأعلى 👆'); $('#nameIn').focus(); return false; }
+  if(!name){ toast('أدخل رمز بطاقتك أولاً في الأعلى 👆'); $('#codeIn').focus(); return false; }
   const s=me();
   if(s.done.includes(id)) { toast('أكملت هذه التجربة من قبل 👍'); return true; }
   s.pts+=points; s.done.push(id);
@@ -276,12 +277,26 @@ function award(id,points,label){
   BADGES.forEach(b=>{ if(!s.badges.includes(b.id)&&b.test(s)){ s.badges.push(b.id); setTimeout(()=>toast(`🏅 شارة جديدة: ${b.name}`),1400);} });
   save(); renderCards(); return true;
 }
-$('#nameBtn').onclick=()=>{
-  const v=$('#nameIn').value.trim(), c=$('#clsIn').value.trim(), sc=SCHOOL?SCHOOL.name:$('#schIn').value.trim();
-  if(!v) return toast('اكتب اسمك 😊'); if(!c) return toast('اكتب الصف 🏫');
-  name=key(`${SID?SID+' | ':''}${v} | ${c} | ${sc}`); if(!students[name]) students[name]=blank(v,c,sc); save(); renderCards(); toast(`أهلاً ${v}! 🔬`);
-};
-['#nameIn','#clsIn'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')$('#nameBtn').click()}));
+/* ---------- الدخول برمز البطاقة ---------- */
+async function sha(t){ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+const normCode=v=>v.replace(/\D/g,'');
+async function login(){
+  if(name&&students[name]){ name=''; local.set('club.name',''); renderScore(); renderCards(); toast('اختر بطاقة أخرى أو أدخل رمزك'); $('#codeIn').focus(); return; }
+  if(!SCHOOL) return toast('افتح رابط مدرستك للدخول');
+  const code=normCode($('#codeIn').value), v=$('#nameIn').value.trim();
+  if(code.length<6) return toast('اكتب رمز البطاقة كاملاً 🎟️');
+  if(!db) return toast('لا يوجد اتصال بالإنترنت، حاول مرة أخرى');
+  const h=await sha(code); let rec=null;
+  try{ rec=(await db.ref(`codes/${SID}/${h}`).get()).val(); }catch(e){ return toast('تعذّر التحقق، حاول مرة أخرى'); }
+  if(!rec) return toast('الرمز غير صحيح ❌ اسألي معلمتك');
+  const k=`${SID}_${h.slice(0,16)}`;
+  if(rec.used){ if(!students[k]) students[k]=blank(rec.name,rec.cls,SCHOOL.name,h); name=k; save(); renderCards(); toast(`أهلاً بعودتك ${rec.name}! 🔬`); return; }
+  if(!v) { $('#nameIn').focus(); return toast('اكتب اسمك (أول مرة فقط) 😊'); }
+  try{ await db.ref(`codes/${SID}/${h}`).update({used:true,name:v,t:Date.now()}); }catch(e){ return toast('تعذّر تفعيل البطاقة'); }
+  students[k]=blank(v,rec.cls,SCHOOL.name,h); name=k; save(); renderCards(); toast(`أهلاً ${v}! تم تفعيل بطاقتك ✅`);
+}
+$('#nameBtn').onclick=login;
+['#nameIn','#codeIn'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')$('#nameBtn').click()}));
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
   $('#tab-teacher').hidden=true; ['exp','badges','board'].forEach(t=>$('#tab-'+t).hidden = t!==b.dataset.tab);
@@ -554,7 +569,7 @@ function renderBoard(){
   const rows=Object.entries(students).filter(([k,s])=>!SID||s.sid===SID).sort((a,b)=>b[1].pts-a[1].pts);
   $('#board').className='board'+(SID?' s':''); $('#board').innerHTML=`<div class="hdr"><span>${db?'<span class="live"></span>':''}الطالب</span><span>الصف</span>${SID?'':'<span>المدرسة</span>'}<span>النقاط</span></div>`+
    (rows.length?rows.map(([k,s],i)=>`<div class="${k===name?'me':''} ${i<3?'top3':''}"><span>${['🥇','🥈','🥉'][i]||(i+1)} ${s.name}</span><span>${s.cls}</span>${SID?'':`<span>${s.school}</span>`}<span>${s.pts} ⭐<small>${s.done.length}/${EXPS.length} تجربة</small></span></div>`).join(''):`<div class="empty">لا أحد بعد… كن أول المكتشفين!</div>`);
-  $('#boardNote').textContent = db?'اللوحة مشتركة وتتحدث مباشرة لجميع الطلاب':'النتائج محفوظة على هذا الجهاز فقط';
+  $('#boardNote').textContent = db?'اللوحة مشتركة وتتحدث مباشرة لجميع الطالبات · الدخول ببطاقة الرمز فقط':'النتائج محفوظة على هذا الجهاز فقط';
 }
 /* ---------- لوحة المعلم / المشرفة ---------- */
 $('#teacher').onclick=()=>{
@@ -569,6 +584,10 @@ function renderTeacher(){
   const links = !SCHOOL ? `<div class="lab"><b>روابط المدارس (أعطي كل محضّر رابطه ورقمه السري):</b>${Object.entries(SCHOOLS).map(([id,sc])=>`<div style="font-size:15px;direction:ltr;text-align:left;word-break:break-all">${location.origin+location.pathname}?school=${id} <span dir="rtl">— ${sc.name} (الرقم: ${sc.pin})</span></div>`).join('')||'<div style="opacity:.7">لم تُضف مدارس بعد. أضيفيها في SCHOOLS داخل الملف.</div>'}</div>`:'';
   $('#tab-teacher').innerHTML=`<h2 style="margin:0 0 8px">📋 ${SCHOOL?SCHOOL.name:'كل المدارس'} — ${rows.length} طالب</h2>
    <div class="choices"><button id="csv">تحميل Excel 📥</button><button id="wipe" style="border-color:var(--coral);color:var(--coral)">تصفير النتائج 🗑️</button><button id="closeT">إغلاق ✖️</button></div>${links}
+   ${SCHOOL?`<div class="lab" id="codesBox" style="margin-top:12px"><b>🎟️ رموز الدخول (بطاقات الطالبات)</b>
+   <div class="choices" style="margin-top:8px;align-items:center"><label>الصف <input id="gcls" placeholder="مثال: 4/1" style="width:110px"></label><label>العدد <input id="gnum" type="number" value="30" min="1" max="60" style="width:70px"></label><button id="gen">توليد وطباعة 🖨️</button><button id="reprint">إعادة طباعة غير المستخدمة</button><button id="codesCsv">تحميل الرموز 📥</button></div>
+   <div style="font-size:14px;opacity:.75;margin-top:6px">الرموز نفسها لا تُحفظ في الإنترنت (تُحفظ مشفّرة فقط)، لذا اطبعي البطاقات أو حمّليها فور توليدها. نسخة من الرموز تُحفظ على هذا الجهاز لإعادة الطباعة.</div>
+   <div id="codesList" style="margin-top:10px;font-size:15px">جارٍ التحميل…</div></div>`:''}
    <div class="board" style="margin-top:12px"><div class="hdr t"><span>الطالب</span><span>الصف</span>${SCHOOL?'':'<span>المدرسة</span>'}<span>النقاط</span><span>التجارب</span><span></span></div>
    ${rows.map(([k,s])=>`<div class="t"><span>${s.name}</span><span>${s.cls}</span>${SCHOOL?'':`<span>${s.school}</span>`}<span>${s.pts}</span><span>${s.done.length}/${EXPS.length}</span><span><button data-del="${k}" style="background:none;color:var(--coral);padding:0">حذف</button></span></div>`).join('')||'<div class="empty">لا نتائج بعد</div>'}</div>
    <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">تفاصيل التجارب لكل طالب</summary>${rows.map(([k,s])=>`<div style="margin:8px 0;font-size:15px"><b>${s.name} (${s.cls})</b>: ${EXPS.map(e=>s.done.includes(e.id)?'✅':'⬜').join('')}</div>`).join('')}<div style="font-size:13px;opacity:.7">ترتيب المربعات = ترتيب التجارب في الصفحة</div></details>`;
@@ -580,7 +599,41 @@ function renderTeacher(){
   };
   $('#wipe').onclick=()=>{ if(!confirm('حذف جميع نتائج '+(SCHOOL?SCHOOL.name:'كل المدارس')+'؟')) return; rows.forEach(([k])=>removeStudent(k)); renderTeacher(); toast('تم التصفير'); };
   $('#closeT').onclick=()=>{ $('#tab-teacher').hidden=true; document.querySelector('nav button').click(); };
+  if(SCHOOL) initCodes();
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('حذف '+students[b.dataset.del].name+'؟')){ removeStudent(b.dataset.del); renderTeacher(); } });
+}
+/* ---------- إدارة رموز الدخول ---------- */
+const myCodes=()=>local.get('club.codes.'+SID,{});      // نسخة محلية: hash -> {code,cls}
+const fmt=c=>c.slice(0,4)+'-'+c.slice(4);
+function printCards(list){ // list: [{code,cls}]
+  const url=location.origin+location.pathname+'?school='+SID;
+  const w=window.open('','_blank'); if(!w) return toast('اسمحي بالنوافذ المنبثقة للطباعة');
+  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>بطاقات نادي العلوم</title><style>
+  body{font-family:Arial,sans-serif;margin:10mm;color:#1B2A49}.g{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm}
+  .c{border:2px dashed #3DCC7A;border-radius:10px;padding:8px 10px;page-break-inside:avoid;text-align:center}
+  .c h3{margin:0;font-size:15px}.c .s{font-size:11px;opacity:.75;margin:2px 0 6px}.c .k{font-size:26px;font-weight:900;letter-spacing:3px;direction:ltr;color:#FF6B57}
+  .c .u{font-size:10px;direction:ltr;word-break:break-all;opacity:.8;margin-top:6px}.c .cl{font-size:13px;font-weight:700}
+  @media print{body{margin:6mm}}</style></head><body><div class="g">${list.map(x=>`<div class="c"><h3>🔬 نادي العلوم</h3><div class="s">${SCHOOL.name}</div><div class="cl">الصف ${x.cls}</div><div class="k">${fmt(x.code)}</div><div class="u">${url}</div></div>`).join('')}</div><${"scr"+"ipt"}>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);
+  w.document.close();
+}
+function initCodes(){
+  const list=$('#codesList'); if(!db){ list.textContent='الرموز تحتاج اتصالاً بالإنترنت'; return; }
+  db.ref('codes/'+SID).off(); db.ref('codes/'+SID).on('value',snap=>{
+    const v=snap.val()||{}, mine=myCodes(); const rows=Object.entries(v).sort((a,b)=>(a[1].cls||'').localeCompare(b[1].cls||'')||(a[1].used===b[1].used?0:a[1].used?1:-1));
+    const used=rows.filter(r=>r[1].used).length;
+    list.innerHTML=`<div style="margin-bottom:6px">الإجمالي: <b>${rows.length}</b> — مستخدمة: <b>${used}</b> — غير مستخدمة: <b>${rows.length-used}</b></div>`+
+      (rows.length?`<div class="board s"><div class="hdr"><span>الرمز</span><span>الصف</span><span>الحالة</span><span></span></div>${rows.map(([h,r])=>`<div><span style="direction:ltr;text-align:right">${mine[h]?fmt(mine[h].code):'••••-••••'}</span><span>${r.cls||''}</span><span>${r.used?'✅ '+(r.name||''):'⬜ غير مستخدم'}</span><span><button data-dc="${h}" style="background:none;color:var(--coral);padding:0">حذف</button></span></div>`).join('')}</div>`:'<div class="empty">لم تُولَّد رموز بعد</div>');
+    list.querySelectorAll('[data-dc]').forEach(b=>b.onclick=()=>{ if(!confirm('حذف هذا الرمز؟ '+(v[b.dataset.dc].used?'سيُحذف حساب الطالبة ونتائجها أيضاً.':''))) return; const h=b.dataset.dc; db.ref(`codes/${SID}/${h}`).remove(); const k=`${SID}_${h.slice(0,16)}`; if(students[k]) removeStudent(k); const m=myCodes(); delete m[h]; local.set('club.codes.'+SID,m); });
+  });
+  $('#gen').onclick=async()=>{
+    const cls=$('#gcls').value.trim(), n=Math.min(60,Math.max(1,+$('#gnum').value||0)); if(!cls) return toast('اكتبي الصف أولاً');
+    const made=[], m=myCodes(), upd={};
+    for(let i=0;i<n;i++){ const code=String(Math.floor(10000000+Math.random()*90000000)); const h=await sha(code); upd[h]={cls,used:false,name:'',t:Date.now()}; m[h]={code,cls}; made.push({code,cls}); }
+    try{ await db.ref('codes/'+SID).update(upd); }catch(e){ return toast('تعذّر حفظ الرموز: تحققي من قواعد Firebase'); }
+    local.set('club.codes.'+SID,m); toast(`تم توليد ${n} رمزاً للصف ${cls} ✅`); printCards(made);
+  };
+  $('#reprint').onclick=()=>{ const m=myCodes(); db.ref('codes/'+SID).get().then(snap=>{ const v=snap.val()||{}; const list=Object.entries(m).filter(([h])=>v[h]&&!v[h].used).map(([h,x])=>x); if(!list.length) return toast('لا توجد رموز غير مستخدمة محفوظة على هذا الجهاز'); printCards(list); }); };
+  $('#codesCsv').onclick=()=>{ const m=myCodes(); const lines=[['الرمز','الصف'],...Object.values(m).map(x=>[fmt(x.code),x.cls])]; const csv='\uFEFF'+lines.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n'); const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`رموز-نادي-العلوم-${SCHOOL.name}.csv`;a.click(); };
 }
 function removeStudent(k){ delete students[k]; if(db) db.ref('students/'+k).remove(); else local.set('club.students',students); if(k===name){name='';local.set('club.name','');} renderScore(); renderCards(); }
 if(SCHOOL) $('#schoolName').textContent=SCHOOL.name;
