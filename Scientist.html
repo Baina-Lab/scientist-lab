@@ -146,7 +146,7 @@ footer button{background:none;color:inherit;text-decoration:underline;padding:0}
       <div><h1>نادي العلوم</h1><p id="schoolName" style="margin:6px 0 0;font-size:22px;font-weight:700;color:var(--sun)"></p><p id="sub">جرّب، واكتشف، واجمع النقاط!</p></div>
     </div>
     <div class="who">
-      <div class="row"><label for="codeIn">الرمز:</label><input id="codeIn" placeholder="رمز البطاقة" inputmode="numeric" autocomplete="off" aria-label="رمز الدخول" style="direction:ltr;text-align:center;letter-spacing:2px"></div>
+      <div class="row"><label for="codeIn">الرمز:</label><input id="codeIn" placeholder="رمز البطاقة" inputmode="numeric" maxlength="4" autocomplete="off" aria-label="رمز الدخول" style="direction:ltr;text-align:center;letter-spacing:2px"></div>
       <div class="row"><label for="nameIn">الاسم:</label><input id="nameIn" placeholder="اكتب اسمك (أول مرة فقط)" autocomplete="off" aria-label="اسم الطالب"></div>
       <div id="whoNow" style="display:none;font-weight:700;margin-bottom:10px"></div>
       <input id="schIn" type="hidden">
@@ -284,7 +284,7 @@ async function login(){
   if(name&&students[name]){ name=''; local.set('club.name',''); renderScore(); renderCards(); toast('اختر بطاقة أخرى أو أدخل رمزك'); $('#codeIn').focus(); return; }
   if(!SCHOOL) return toast('افتح رابط مدرستك للدخول');
   const code=normCode($('#codeIn').value), v=$('#nameIn').value.trim();
-  if(code.length<6) return toast('اكتب رمز البطاقة كاملاً 🎟️');
+  if(code.length!==4) return toast('الرمز 4 أرقام 🎟️');
   if(!db) return toast('لا يوجد اتصال بالإنترنت، حاول مرة أخرى');
   const h=await sha(code); let rec=null;
   try{ rec=(await db.ref(`codes/${SID}/${h}`).get()).val(); }catch(e){ return toast('تعذّر التحقق، حاول مرة أخرى'); }
@@ -604,7 +604,7 @@ function renderTeacher(){
 }
 /* ---------- إدارة رموز الدخول ---------- */
 const myCodes=()=>local.get('club.codes.'+SID,{});      // نسخة محلية: hash -> {code,cls}
-const fmt=c=>c.slice(0,4)+'-'+c.slice(4);
+const fmt=c=>c;
 function printCards(list){ // list: [{code,cls}]
   const url=location.origin+location.pathname+'?school='+SID;
   const w=window.open('','_blank'); if(!w) return toast('اسمحي بالنوافذ المنبثقة للطباعة');
@@ -628,7 +628,9 @@ function initCodes(){
   $('#gen').onclick=async()=>{
     const cls=$('#gcls').value.trim(), n=Math.min(60,Math.max(1,+$('#gnum').value||0)); if(!cls) return toast('اكتبي الصف أولاً');
     const made=[], m=myCodes(), upd={};
-    for(let i=0;i<n;i++){ const code=String(Math.floor(10000000+Math.random()*90000000)); const h=await sha(code); upd[h]={cls,used:false,name:'',t:Date.now()}; m[h]={code,cls}; made.push({code,cls}); }
+    const existing=(await db.ref('codes/'+SID).get()).val()||{}; let guard=0;
+    while(made.length<n && guard++<5000){ const code=String(Math.floor(1000+Math.random()*9000)); const h=await sha(code); if(existing[h]||upd[h]) continue; upd[h]={cls,used:false,name:'',t:Date.now()}; m[h]={code,cls}; made.push({code,cls}); }
+    if(made.length<n) toast('تنبيه: تم توليد '+made.length+' رمزاً فقط');
     try{ await db.ref('codes/'+SID).update(upd); }catch(e){ return toast('تعذّر حفظ الرموز: تحققي من قواعد Firebase'); }
     local.set('club.codes.'+SID,m); toast(`تم توليد ${n} رمزاً للصف ${cls} ✅`); printCards(made);
   };
